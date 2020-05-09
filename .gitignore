@@ -1,0 +1,8 @@
+# ignore Mac OS X Finder files
+.DS_Store
+
+# ignore Emacs backup files
+*~
+
+# ignore Emacs autosave files
+\#*#
