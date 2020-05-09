@@ -9,6 +9,17 @@
     Copyleft 2020 by Syd Bauman.
   -->
   <!--
+    Revision history
+    ======== =======
+    2020-05-08 ~23:50 by Syd Bauman: started
+    2020-05-09 ~00:05 by Syd Bauman: first draft code complete
+    2020-05-09 ~00:20 by Syd Bauman: comments added, posted to slack
+    2020-05-09 ~00:25 by Syd Bauman: bug fix: count only XSL elements for
+                      the denominator. Also factor out common divide by
+                      $total in the calculation.
+    2020-05-09 ~00:30 by Syd Bauman: Add this revision hx.
+  -->
+  <!--
     Version 1: algorithm as (I think) Gerrit used on his spreadsheet, but
     works only on a single XSLT file. BTW, the HOAXCoQS for this program
     is 11.76.
@@ -39,11 +50,11 @@
   <xsl:output method="text"/>
   
   <xsl:template match="/">
-    <xsl:variable name="total" select="count( //* )"/>
+    <xsl:variable name="total" select="count( //xsl:* )"/>
     <xsl:variable name="good" select="count( key('good', true() ) )"/>
     <xsl:variable name="bad" select="count( key('bad', true() ) )"/>
     <xsl:sequence select="'The HOAXCoQS score of '||document-uri(/)||' is '"/>
-    <xsl:sequence select="100 * ( ( $good div $total ) - ( $bad div $total ) )"/>
+    <xsl:sequence select="100 * ( ( $good - $bad ) div $total )"/>
     <xsl:text>&#x0A;</xsl:text>
   </xsl:template>
   
