@@ -30,12 +30,16 @@
     2020-05-10 ~16:00 UTC by Gerrit Imsieke: Use 'good' and 'bad' modes
                       instead of 'good' and 'bad' keys in order to support 
                       weights when counting occurrences. (Version 1.2)
+    2020-05-10 ~18:40 UTC by Gerrit Imsieke: Added assertions that weights
+                      not be negative. We could accept both positive and 
+                      negative weights. Then we wouldn’t get separate 'good'
+                      and 'bad' results.
   -->
   <!--
     Version 1.2: Weight support. The weights (default: 1) can be 
       customized by importing the stylesheet, as demonstrated
       in xslt1fan.xsl.
-      The program’s HOAXCoQS (including xslt1fan.xsl) is now 69.23.
+      The program’s HOAXCoQS (including xslt1fan.xsl) is now 70.15.
     Version 1.1: Program can alternatively process directories. 
       The program’s HOAXCoQS is now 47.92.
     Version 1: algorithm as (I think) Gerrit used on his spreadsheet, but
@@ -155,9 +159,13 @@
     <xsl:variable name="goods" as="xs:double*">
       <xsl:apply-templates select="$stylesheet" mode="good"/>
     </xsl:variable>
+    <xsl:assert test="every $w in $goods satisfies $w ge 0" 
+      error-code="hoaxcoqs:E01">Weights must not be negative</xsl:assert>
     <xsl:variable name="bads" as="xs:double*">
       <xsl:apply-templates select="$stylesheet" mode="bad"/>
     </xsl:variable>
+    <xsl:assert test="every $w in $bads satisfies $w ge 0" 
+      error-code="hoaxcoqs:E01">Weights must not be negative</xsl:assert>
     <xsl:sequence select="map { 
                                 'good': sum($goods),
                                 'bad' : sum($bads)
