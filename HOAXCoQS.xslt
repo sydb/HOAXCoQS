@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xpath-default-namespace="http://www.w3.org/1999/XSL/Transform"
   version="3.0">
   <!--
@@ -18,11 +19,13 @@
                       the denominator. Also factor out common divide by
                       $total in the calculation.
     2020-05-09 ~00:30 by Syd Bauman: Add this revision hx.
+    2020-05-10 ~08:00 UTC by Gerrit Imsieke: Process all XSL files in the 
+                      directory as specified by the $dir param. 
   -->
   <!--
     Version 1: algorithm as (I think) Gerrit used on his spreadsheet, but
     works only on a single XSLT file. BTW, the HOAXCoQS for this program
-    is 11.76.
+    is 25.64.
     
     Future plans:
     * improve algorithm, including weighting of constructs and using
@@ -47,15 +50,64 @@
   <xsl:key name="bad" match="for-each" use="true()"/>
   <xsl:key name="bad" match="value-of" use="true()"/>
 
+  <xsl:param name="dir" as="xs:string?" select="()">
+    <!-- A file URI for a directory that is recursively scanned. 
+         All files whose names end in '.xsl' or '.xslt' are processed.
+         If the files are not well-formed, they won’t be analyzed.
+         If $dir is a relative path, it is resolved against the base 
+         URI of this stylesheet. -->
+  </xsl:param>
+
   <xsl:output method="text"/>
   
-  <xsl:template match="/">
-    <xsl:variable name="total" select="count( //xsl:* )"/>
-    <xsl:variable name="good" select="count( key('good', true() ) )"/>
-    <xsl:variable name="bad" select="count( key('bad', true() ) )"/>
-    <xsl:sequence select="'The HOAXCoQS score of '||document-uri(/)||' is '"/>
-    <xsl:sequence select="100 * ( ( $good - $bad ) div $total )"/>
-    <xsl:text>&#x0A;</xsl:text>
+  <xsl:template match="/" as="map(xs:string, xs:anyAtomicType)?">
+    <!-- GI: I’d like to use "map(xs:string, xs:integer)?", but I cannot specify
+      a more detailed value type on xsl:map below -->
+    <xsl:variable name="total" select="count( //xsl:* )" as="xs:integer"/>
+    <xsl:variable name="good" select="count( key('good', true() ) )" as="xs:integer"/>
+    <xsl:variable name="bad" select="count( key('bad', true() ) )" as="xs:integer"/>
+    <xsl:choose>
+      <xsl:when test="$dir">
+        <!-- don’t output anything yet, just return this document’s counts -->
+        <xsl:map>
+          <xsl:map-entry key="'total'" select="$total"/>
+          <xsl:map-entry key="'good'" select="$good"/>
+          <xsl:map-entry key="'bad'" select="$bad"/>
+          <!-- we don’t use the URIs yet -->
+          <xsl:map-entry key="'uri'" select="document-uri(.)"/>
+        </xsl:map>
+      </xsl:when>
+      <xsl:otherwise>
+        <!-- output the score for a single source document -->
+        <xsl:call-template name="text-output">
+          <xsl:with-param name="total" select="$total"/>
+          <!-- omitting @as attributes here since we don’t want to artificially 
+               boost this stylesheet’s score -->
+          <xsl:with-param name="good" select="$good"/>
+          <xsl:with-param name="bad" select="$bad"/>
+        </xsl:call-template>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
+  <xsl:template name="text-output">
+    <xsl:param name="total" as="xs:integer"/>
+    <xsl:param name="good" as="xs:integer"/>
+    <xsl:param name="bad" as="xs:integer"/>
+    <xsl:message select="'The HOAXCoQS score of', ($dir, document-uri(/))[1], 'is',
+      format-number( 100 * ( ( $good - $bad ) div $total ), '###.99')"/>
+  </xsl:template>
+  
+  <xsl:template name="xsl:initial-template">
+    <xsl:variable name="results" as="map(xs:string, xs:anyAtomicType)*">
+      <xsl:apply-templates 
+        select="collection($dir || '?recurse=yes;select=*.(xsl|xslt);on-error=warning')"/>  
+    </xsl:variable>
+    <xsl:call-template name="text-output">
+      <xsl:with-param name="total" select="sum($results ! ?total)"/>
+      <xsl:with-param name="good" select="sum($results ! ?good)"/>
+      <xsl:with-param name="bad" select="sum($results ! ?bad)"/>
+    </xsl:call-template>
   </xsl:template>
   
 </xsl:stylesheet>
