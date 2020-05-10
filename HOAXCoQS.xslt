@@ -20,7 +20,9 @@
                       $total in the calculation.
     2020-05-09 ~00:30 by Syd Bauman: Add this revision hx.
     2020-05-10 ~08:00 UTC by Gerrit Imsieke: Process all XSL files in the 
-                      directory as specified by the $dir param. 
+                      directory as specified by the $dir param.
+                      Also, output the score as an xsl:message instead 
+                      of text.
   -->
   <!--
     Version 1: algorithm as (I think) Gerrit used on his spreadsheet, but
@@ -55,7 +57,11 @@
          All files whose names end in '.xsl' or '.xslt' are processed.
          If the files are not well-formed, they won’t be analyzed.
          If $dir is a relative path, it is resolved against the base 
-         URI of this stylesheet. -->
+         URI of this stylesheet.
+         If this parameter is given, a potential source document is 
+         ignored, and saxon needs to be invoked with the -it switch 
+         (no initial template name though).
+    -->
   </xsl:param>
 
   <xsl:output method="text"/>
