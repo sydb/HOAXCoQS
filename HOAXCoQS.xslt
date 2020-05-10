@@ -27,8 +27,15 @@
                       of text.
     2020-05-10 ~10:00 UTC by Gerrit Imsieke: JSON output, accept 
                       space-separated list of directories in dir
+    2020-05-10 ~16:00 UTC by Gerrit Imsieke: Use 'good' and 'bad' modes
+                      instead of 'good' and 'bad' keys in order to support 
+                      weights when counting occurrences. (Version 1.2)
   -->
   <!--
+    Version 1.2: Weight support. The weights (default: 1) can be 
+      customized by importing the stylesheet, as demonstrated
+      in xslt1fan.xsl.
+      The program’s HOAXCoQS (including xslt1fan.xsl) is now 69.23.
     Version 1.1: Program can alternatively process directories. 
       The program’s HOAXCoQS is now 47.92.
     Version 1: algorithm as (I think) Gerrit used on his spreadsheet, but
@@ -48,16 +55,21 @@
     * Count times that atomics are compared using ‘=’, not “eq” (etc.)
     * Examine whitespace and count as bad anything not indented properly
   -->
-  <xsl:key name="good" match="for-each-group" use="true()"/>
-  <xsl:key name="good" match="next-match" use="true()"/>
-  <xsl:key name="good" match="apply-templates" use="true()"/>
-  <xsl:key name="good" match="sequence" use="true()"/>
-  <xsl:key name="good" match="assert" use="true()"/>
-  <xsl:key name="good" match="@tunnel" use="true()"/>
-  <xsl:key name="good" match="@as" use="true()"/>
+
+  <xsl:mode name="bad" on-no-match="shallow-skip"/>
+  <xsl:mode name="good" on-no-match="shallow-skip"/>
   
-  <xsl:key name="bad" match="for-each" use="true()"/>
-  <xsl:key name="bad" match="value-of" use="true()"/>
+  <xsl:template match="value-of | for-each" mode="bad" as="xs:double+">
+    <xsl:sequence select="1"/>
+    <xsl:next-match/>
+  </xsl:template>
+  
+  <xsl:template match="for-each-group | next-match | apply-templates | sequence | assert | @as | @tunnel" 
+    mode="good" as="xs:double+">
+    <xsl:sequence select="1"/>
+    <xsl:next-match/>
+  </xsl:template>
+
 
   <xsl:param name="dir" as="xs:string?" select="()">
     <!-- A file URI for a directory that is recursively scanned.
@@ -77,10 +89,11 @@
   
   <xsl:template match="/" as="map(xs:string, item())">
     <xsl:variable name="total" select="count( //xsl:* )" as="xs:integer"/>
-    <xsl:variable name="good" select="count( key('good', true() ) )" as="xs:integer"/>
-    <xsl:variable name="bad" select="count( key('bad', true() ) )" as="xs:integer"/>
+    <xsl:variable name="weighted" as="map(xs:string, xs:anyAtomicType)"
+      select="hoaxcoqs:apply-weights(.)"/><!-- a map with a 'good' 
+        and a 'bad' key, and (possibly weighted) counts as values -->
     <xsl:variable name="counts" as="map(xs:string, item())?"
-      select="hoaxcoqs:counts($total, $good, $bad, document-uri(.))"/>
+      select="hoaxcoqs:counts($total, $weighted?good, $weighted?bad, document-uri(.))"/>
     <xsl:if test="empty($dir)">
       <xsl:call-template name="hoaxcoqs:message"> 
         <xsl:with-param name="counts" select="$counts"/>
@@ -118,15 +131,15 @@
 
   <xsl:function name="hoaxcoqs:score" as="xs:double">
     <xsl:param name="total" as="xs:integer"/>
-    <xsl:param name="good" as="xs:integer"/>
-    <xsl:param name="bad" as="xs:integer"/>
+    <xsl:param name="good" as="xs:double"/>
+    <xsl:param name="bad" as="xs:double"/>
     <xsl:sequence select="100 * ($good - $bad) div $total"/>
   </xsl:function>
 
   <xsl:function name="hoaxcoqs:counts" as="map(xs:string, item())">
     <xsl:param name="total" as="xs:integer"/>
-    <xsl:param name="good" as="xs:integer"/>
-    <xsl:param name="bad" as="xs:integer"/>
+    <xsl:param name="good" as="xs:double"/>
+    <xsl:param name="bad" as="xs:double"/>
     <xsl:param name="uris" as="xs:anyURI+"/>
     <xsl:map>
       <xsl:map-entry key="'total'" select="$total"/>
@@ -137,5 +150,19 @@
     </xsl:map>
   </xsl:function>
 
+  <xsl:function name="hoaxcoqs:apply-weights" as="map(xs:string, xs:anyAtomicType)">
+    <xsl:param name="stylesheet" as="document-node(element(*))?"/>
+    <xsl:variable name="goods" as="xs:double*">
+      <xsl:apply-templates select="$stylesheet" mode="good"/>
+    </xsl:variable>
+    <xsl:variable name="bads" as="xs:double*">
+      <xsl:apply-templates select="$stylesheet" mode="bad"/>
+    </xsl:variable>
+    <xsl:sequence select="map { 
+                                'good': sum($goods),
+                                'bad' : sum($bads)
+                              }"/>
+  </xsl:function>
+  
 
 </xsl:stylesheet>
