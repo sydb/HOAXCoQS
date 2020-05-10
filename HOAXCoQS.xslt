@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:array="http://www.w3.org/2005/xpath-functions/array"
   xmlns:hoaxcoqs="https://github.com/sydb/HOAXCoQS/"
   xpath-default-namespace="http://www.w3.org/1999/XSL/Transform"
   version="3.0">
@@ -29,7 +30,7 @@
   -->
   <!--
     Version 1.1: Program can alternatively process directories. 
-      The program’s HOAXCoQS is now 47.37.
+      The program’s HOAXCoQS is now 47.92.
     Version 1: algorithm as (I think) Gerrit used on his spreadsheet, but
     works only on a single XSLT file. BTW, the HOAXCoQS for this program
     is 11.76.
@@ -92,7 +93,8 @@
 
   <xsl:template name="hoaxcoqs:message">
     <xsl:param name="counts" as="map(xs:string, xs:anyAtomicType)"/>
-    <xsl:message select="'The HOAXCoQS score of', (resolve-uri($dir), document-uri(/))[1], 'is',
+    <xsl:message select="'The HOAXCoQS score of', 
+      string-join(array:flatten($counts?uri), ' '), 'is',
       format-number( hoaxcoqs:score($counts?total, $counts?good, $counts?bad), '###.99')"/>
   </xsl:template>
   
@@ -103,20 +105,15 @@
         <xsl:apply-templates select="."/>  
       </xsl:for-each-group>
     </xsl:variable>
-    <xsl:variable name="total" as="xs:integer" select="sum($individual-results ! ?total)"/>
-    <xsl:variable name="good" as="xs:integer" select="sum($individual-results ! ?good)"/>
-    <xsl:variable name="bad" as="xs:integer" select="sum($individual-results ! ?bad)"/>
-    <xsl:variable name="counts" as="map(xs:string, xs:anyAtomicType)">
-      <xsl:map>
-        <xsl:map-entry key="'total'" select="$total"/>
-        <xsl:map-entry key="'good'" select="$good"/>
-        <xsl:map-entry key="'bad'" select="$bad"/>
-        <xsl:map-entry key="'uri'" select="(resolve-uri($dir))"/>
-        <xsl:map-entry key="'score'" select="hoaxcoqs:score($total, $good, $bad)"/>
-      </xsl:map>
-    </xsl:variable>
+    <xsl:variable name="counts" as="map(xs:string, xs:anyAtomicType)"
+        select="hoaxcoqs:counts(
+                  sum($individual-results ! ?total),
+                  sum($individual-results ! ?good),
+                  sum($individual-results ! ?bad),
+                  tokenize($dir) ! resolve-uri(.)
+                )"/>
     <xsl:call-template name="hoaxcoqs:message">
-      <xsl:with-param name="counts" select="$counts" as="map(xs:string, xs:anyAtomicType)"/>
+      <xsl:with-param name="counts" select="$counts"/> 
     </xsl:call-template>
     <xsl:sequence select="$counts"/>
   </xsl:template>
@@ -137,7 +134,7 @@
       <xsl:map-entry key="'total'" select="$total"/>
       <xsl:map-entry key="'good'" select="$good"/>
       <xsl:map-entry key="'bad'" select="$bad"/>
-      <xsl:map-entry key="'uri'" select="[ $uris ]"/>
+      <xsl:map-entry key="'uri'" select="array { $uris }"/>
       <xsl:map-entry key="'score'" select="hoaxcoqs:score($total, $good, $bad)"/>
     </xsl:map>
   </xsl:function>
