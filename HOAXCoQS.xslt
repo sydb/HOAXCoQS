@@ -75,13 +75,11 @@
 
   <xsl:output method="json"/>
   
-  <xsl:template match="/" as="map(xs:string, xs:anyAtomicType)">
-    <!-- GI: I’d like to use "map(xs:string, xs:integer)?", but I cannot specify
-      a more detailed value type on xsl:map below -->
+  <xsl:template match="/" as="map(xs:string, item())">
     <xsl:variable name="total" select="count( //xsl:* )" as="xs:integer"/>
     <xsl:variable name="good" select="count( key('good', true() ) )" as="xs:integer"/>
     <xsl:variable name="bad" select="count( key('bad', true() ) )" as="xs:integer"/>
-    <xsl:variable name="counts" as="map(xs:string, xs:anyAtomicType)?"
+    <xsl:variable name="counts" as="map(xs:string, item())?"
       select="hoaxcoqs:counts($total, $good, $bad, document-uri(.))"/>
     <xsl:if test="empty($dir)">
       <xsl:call-template name="hoaxcoqs:message"> 
@@ -92,20 +90,20 @@
   </xsl:template>
 
   <xsl:template name="hoaxcoqs:message">
-    <xsl:param name="counts" as="map(xs:string, xs:anyAtomicType)"/>
+    <xsl:param name="counts" as="map(xs:string, item())"/>
     <xsl:message select="'The HOAXCoQS score of', 
       string-join(array:flatten($counts?uri), ' '), 'is',
       format-number( hoaxcoqs:score($counts?total, $counts?good, $counts?bad), '###.99')"/>
   </xsl:template>
   
   <xsl:template name="xsl:initial-template">
-    <xsl:variable name="individual-results" as="map(xs:string, xs:anyAtomicType)*">
+    <xsl:variable name="individual-results" as="map(xs:string, item())*">
       <xsl:for-each-group group-by="base-uri()" 
         select="tokenize($dir) ! collection(. || '?recurse=yes;select=*.(xsl|xslt);on-error=warning')">
         <xsl:apply-templates select="."/>  
       </xsl:for-each-group>
     </xsl:variable>
-    <xsl:variable name="counts" as="map(xs:string, xs:anyAtomicType)"
+    <xsl:variable name="counts" as="map(xs:string, item())"
         select="hoaxcoqs:counts(
                   sum($individual-results ! ?total),
                   sum($individual-results ! ?good),
@@ -125,7 +123,7 @@
     <xsl:sequence select="100 * ($good - $bad) div $total"/>
   </xsl:function>
 
-  <xsl:function name="hoaxcoqs:counts" as="map(xs:string, xs:anyAtomicType)">
+  <xsl:function name="hoaxcoqs:counts" as="map(xs:string, item())">
     <xsl:param name="total" as="xs:integer"/>
     <xsl:param name="good" as="xs:integer"/>
     <xsl:param name="bad" as="xs:integer"/>
