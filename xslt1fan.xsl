@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet 
+<xsl:stylesheet
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xpath-default-namespace="http://www.w3.org/1999/XSL/Transform"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0">
   
   <xsl:import href="HOAXCoQS.xslt"/>
