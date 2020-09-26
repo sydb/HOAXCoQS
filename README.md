@@ -19,4 +19,4 @@ saxon -it -xsl:HOAXCoQS.xslt dir=file:///path/to/dir/
 
 ## Scores
 
-A list of scores can be found in this [Ethercalc sheet](https://ethercalc.org/sg6vohgeswhi). You are engouraged to add your own scores. A CSV dump of that sheet is included in the scores directory. There is no automatic sync set up between the Ethercalc and the dump.
+A list of scores can be found in this [Ethercalc sheet](https://ethercalc.net/sg6vohgeswhi). You are engouraged to add your own scores. A CSV dump of that sheet is included in the scores directory. There is no automatic sync set up between the Ethercalc and the dump.
