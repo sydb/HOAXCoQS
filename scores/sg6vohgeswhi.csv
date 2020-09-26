@@ -1,12 +1,12 @@
 Project,good,bad,all," score ",Link,public?,"Project Maintainer(s)","score updated",by,"HOAXCoQS version",Comment,,,
-HOAXCoQS,47,0,67,70.1492537313433,https://github.com/sydb/HOAXCoQS,yes,"sydb, gimsieke",43961,gimsieke,1.2,,,,
+HOAXCoQS,47,0,67,70.1492537313433,https://github.com/sydb/HOAXCoQS,yes,"sydb, gimsieke",43961,gimsieke,1.3,,,,
 ENS,85,8,129,59.68992248062015,https://github.com/gimsieke/emphasis-normalize-space,yes,gimsieke,43959,gimsieke,1.2,,,Patterns,"(regex text search across *.xsl files)"
 "Hanser Bel. transpect a9s",1922,216,4216,40.46489563567363,"https://subversion.le-tex.de/customers/hanser/bel/transpect ",no,le-tex,43961,gimsieke,1.2,"only customizing",,good,(<xsl:(for-each-group|next-match|assert|apply-templates|sequence)|\s(tunnel|as)=)
 "Leibniz latexml2tei",1134,70,2713,39.218577220788795,https://github.com/telota/Leibniz-TEI/,no,le-tex,43961,gimsieke,1.2,,,bad,<xsl:(for-each[^-]|value-of)
 "Hogrefe transpect a9s",1672,198,3934,37.46822572445348,"https://hobots.hogrefe.com/BookTagSet/trunk-git/a9s ",no,le-tex,43961,gimsieke,1.2,"only customizing",,all,<xsl:
 "transpect jats2html",506,55,1236,36.48867313915858,https://github.com/transpect/jats2html,yes,,43962,gimsieke,1.2,lib,,,
 xml2tex,173,33,395,35.44303797468354,https://github.com/transpect/xml2tex,yes,mkraetke,43959,gimsieke,1.2,lib,,"The XSLT version of the tool (HOAXCoQS, see table to the left) yields better precision since it doesn’t count code that is commented out, for ex.",
-"DocBook xslTNG",3093,188,8552,33.97,https://github.com/docbook/xslTNG,yes,ndw,44042,gimsieke,1.2,,,,
+"DocBook xslTNG",3130,691,8646,28.21,https://github.com/docbook/xslTNG,yes,ndw,44100,gimsieke,1.3,,,,
 idml2xml,1321,205,3286,33.9622641509434,https://github.com/transpect/idml2xml/,yes,le-tex,43959,gimsieke,1.2,lib,,,
 join-list-fragments,23,0,73,31.506849315068493,https://github.com/gimsieke/join-list-fragments/,yes,gimsieke,43959,gimsieke,1.2,,,,
 docx2hub,2034,345,5782,29.21134555517122,https://github.com/transpect/docx2hub,yes,le-tex,43959,gimsieke,1.2,lib,,,

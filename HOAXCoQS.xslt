@@ -63,7 +63,9 @@
   <xsl:mode name="bad" on-no-match="shallow-skip"/>
   <xsl:mode name="good" on-no-match="shallow-skip"/>
   
-  <xsl:template match="value-of | for-each" mode="bad" as="xs:double+">
+  <xsl:template match="value-of | for-each | apply-templates/with-param[not(@tunnel = ('yes', '1', 'true'))]
+                       | template[@match][empty(@name)]/param[not(@tunnel = ('yes', '1', 'true'))]"
+    mode="bad" as="xs:double+">
     <xsl:sequence select="1"/>
     <xsl:next-match/>
   </xsl:template>
